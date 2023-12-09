@@ -2,10 +2,12 @@
 const sql = require('mssql');
 
 const config = {
-  server: 'localhost',
+  user: 'brandon',
+  password: 'Brandon?',
+  server: 'DESKTOP-HQNQOQO',
   database: 'Boss',
   options: {
-    trustedConnection: true, // Habilita la autenticación de Windows
+    encrypt: false, // Configuración específica para evitar problemas con la encriptación
   },
 };
 
