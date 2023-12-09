@@ -3,6 +3,8 @@ const app = express();
 const port = 3000;
 const axios = require('axios');
 const db = require('./db/db'); // Ajusta la ruta según la estructura de tu proyecto
+// Middleware para parsear el cuerpo de las solicitudes como JSON
+app.use(express.json());
 
 // Ruta para obtener información de los jefes de la API de Ninja Kiwi y jefes favoritos
 app.get('/bosses', async (req, res) => {
@@ -15,25 +17,24 @@ app.get('/bosses', async (req, res) => {
     const result = await db.request().query('SELECT * FROM JefesFavoritos');
     const jefesFavoritos = result.recordset;
 
-    // Combinar la información de jefes de la API y jefes favoritos
-    const todosLosJefes = [...bosses, ...jefesFavoritos];
-
-    // Enviar la información de todos los jefes
-    res.json(todosLosJefes);
+    // Enviar la información de jefes de la API y jefes favoritos en la respuesta JSON
+    res.json({ bosses, jefesFavoritos });
   } catch (error) {
     console.error('Error al obtener la información de los jefes:', error.message);
-    res.status(500).send('Error interno del servidor');
+    res.status(500).json({ error: 'Error al obtener la información de los jefes', details: error.message });
   }
 });
-
-// Middleware para parsear el cuerpo de las solicitudes como JSON
-app.use(express.json());
 
 // Ruta para agregar un jefe favorito
 app.post('/favoritos/agregar', async (req, res) => {
   const { nombreJefe, imagen } = req.body;
 
   try {
+    // Verificar que se hayan proporcionado nombreJefe e imagen
+    if (!nombreJefe || !imagen) {
+      return res.status(400).json({ error: 'Se requieren nombreJefe e imagen' });
+    }
+
     // Insertar el jefe favorito en la base de datos
     const result = await db.request()
       .input('nombreJefe', db.NVarChar, nombreJefe)
@@ -43,10 +44,10 @@ app.post('/favoritos/agregar', async (req, res) => {
         VALUES (@nombreJefe, @imagen)
       `);
 
-    res.status(201).json({ message: 'Jefe favorito agregado correctamente' });
+    res.status(201).json({ success: true, message: 'Jefe favorito agregado correctamente' });
   } catch (error) {
     console.error('Error al agregar jefe favorito:', error.message);
-    res.status(500).send('Error interno del servidor');
+    res.status(500).json({ error: 'Error al agregar jefe favorito', details: error.message });
   }
 });
 
@@ -63,10 +64,10 @@ app.delete('/favoritos/quitar/:nombreJefe', async (req, res) => {
         WHERE NombreJefe = @nombreJefe
       `);
 
-    res.json({ message: 'Jefe favorito eliminado correctamente' });
+    res.json({ success: true, message: 'Jefe favorito eliminado correctamente' });
   } catch (error) {
     console.error('Error al quitar jefe favorito:', error.message);
-    res.status(500).send('Error interno del servidor');
+    res.status(500).json({ error: 'Error al quitar jefe favorito', details: error.message });
   }
 });
 
