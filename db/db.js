@@ -7,7 +7,7 @@ const config = {
   server: 'DESKTOP-HQNQOQO',
   database: 'Boss',
   options: {
-    encrypt: false, // Configuración específica para evitar problemas con la encriptación
+    encrypt: false,
   },
 };
 
