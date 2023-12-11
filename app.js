@@ -3,7 +3,7 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000; // Utilizando el puerto especificado en la variable de entorno o 3000 por defecto
 const axios = require('axios');
-const sql = require('mssql');
+const sql = require('mysql2');
 const db = require('./db/db'); // Ajusta la ruta según la estructura de tu proyecto
 
 // Middleware para parsear el cuerpo de las solicitudes como JSON
