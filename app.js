@@ -17,7 +17,9 @@ app.get('/bosses', async (req, res) => {
 
     res.json({ bosses, jefesFavoritos });
   } catch (error) {
-    console.error('Error al obtener la información de los jefes:', error.message);
+    console.error('Error al obtener la información de los jefes:', error);
+
+    // Devolver un error más detallado al cliente
     res.status(500).json({ error: 'Error al obtener la información de los jefes', details: error.message });
   }
 });
@@ -41,13 +43,17 @@ app.post('/favoritos/agregar', async (req, res) => {
       const jefeAgregado = jefesAgregados[0];
       res.status(201).json({ success: true, message: 'Jefe favorito agregado correctamente', jefeAgregado });
     } else {
+      console.error('Error al agregar jefe favorito: No se pudo obtener el jefe recién agregado');
       res.status(500).json({ error: 'Error al agregar jefe favorito', details: 'No se pudo obtener el jefe recién agregado' });
     }
   } catch (error) {
-    console.error('Error al agregar jefe favorito:', error.message);
+    console.error('Error al agregar jefe favorito:', error);
+
+    // Devolver un error más detallado al cliente
     res.status(500).json({ error: 'Error al agregar jefe favorito', details: error.message });
   }
 });
+
 app.delete('/favoritos/quitar/:id', async (req, res) => {
   const idJefe = req.params.id;
 
