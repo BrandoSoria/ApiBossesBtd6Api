@@ -12,7 +12,8 @@ app.get('/bosses', async (req, res) => {
     const response = await axios.get('https://data.ninjakiwi.com/btd6/bosses');
     const bosses = response.data.body;
 
-    const [jefesFavoritos] = await db.query('SELECT * FROM JefesFavoritos');
+    const [rows] = await db.query('SELECT * FROM JefesFavoritos');
+    const jefesFavoritos = rows;
 
     res.json({ bosses, jefesFavoritos });
   } catch (error) {
@@ -29,10 +30,15 @@ app.post('/favoritos/agregar', async (req, res) => {
       return res.status(400).json({ error: 'Se requiere nombreJefe' });
     }
 
-    const [result] = await db.query('INSERT INTO JefesFavoritos (NombreJefe, Imagen) VALUES (?, ?)', [nombreJefe, imagen]);
+    const [result] = await db.query(
+      'INSERT INTO JefesFavoritos (NombreJefe, Imagen) VALUES (?, ?)',
+      [nombreJefe, imagen]
+    );
 
-    if (result.affectedRows > 0) {
-      const jefeAgregado = { Id: result.insertId, NombreJefe: nombreJefe, Imagen: imagen };
+    const [jefesAgregados] = await db.query('SELECT * FROM JefesFavoritos WHERE NombreJefe = ?', [nombreJefe]);
+
+    if (jefesAgregados.length > 0) {
+      const jefeAgregado = jefesAgregados[0];
       res.status(201).json({ success: true, message: 'Jefe favorito agregado correctamente', jefeAgregado });
     } else {
       res.status(500).json({ error: 'Error al agregar jefe favorito', details: 'No se pudo obtener el jefe recién agregado' });
@@ -42,7 +48,6 @@ app.post('/favoritos/agregar', async (req, res) => {
     res.status(500).json({ error: 'Error al agregar jefe favorito', details: error.message });
   }
 });
-
 app.delete('/favoritos/quitar/:id', async (req, res) => {
   const idJefe = req.params.id;
 
