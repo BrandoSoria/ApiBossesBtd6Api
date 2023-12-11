@@ -2,12 +2,10 @@
 require('dotenv').config();
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000; // Utilizando el puerto especificado en la variable de entorno o 3000 por defecto
+const port = process.env.PORT || 3000;
 const axios = require('axios');
-const sql = require('mysql2');
-const db = require('./db/db'); // Ajusta la ruta según la estructura de tu proyecto
+const db = require('./db/db');
 
-// Middleware para parsear el cuerpo de las solicitudes como JSON
 app.use(express.json());
 
 // Ruta para obtener información de los jefes de la API de Ninja Kiwi y jefes favoritos
@@ -87,6 +85,12 @@ app.delete('/favoritos/quitar/:nombreJefe', async (req, res) => {
 });
 
 // Iniciar el servidor
-app.listen(port, '0.0.0.0', () => {
-  console.log(`El servidor está escuchando en http://0.0.0.0:${port}`);
+app.listen(port, '0.0.0.0', async () => {
+  try {
+    const dbConnection = await db.connectToDatabase();
+    // Puedes usar dbConnection para realizar operaciones en la base de datos si es necesario
+    console.log(`El servidor está escuchando en http://0.0.0.0:${port}`);
+  } catch (error) {
+    console.error('Error al iniciar el servidor:', error.message);
+  }
 });
