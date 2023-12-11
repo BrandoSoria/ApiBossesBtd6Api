@@ -1,8 +1,7 @@
-// app.js
 require('dotenv').config();
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = process.env.PORT || 3000; // Utilizando el puerto especificado en la variable de entorno o 3000 por defecto
 const axios = require('axios');
 const sql = require('mssql');
 const db = require('./db/db'); // Ajusta la ruta según la estructura de tu proyecto
@@ -87,6 +86,6 @@ app.delete('/favoritos/quitar/:nombreJefe', async (req, res) => {
 });
 
 // Iniciar el servidor
-app.listen(port, () => {
-  console.log(`El servidor está escuchando en http://localhost:${port}`);
+app.listen(port, '0.0.0.0', () => {
+  console.log(`El servidor está escuchando en http://0.0.0.0:${port}`);
 });
