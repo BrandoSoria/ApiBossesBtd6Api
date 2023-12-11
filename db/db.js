@@ -1,11 +1,11 @@
 const sql = require('mssql');
 
 const config = {
-  user: process.env.CLEVER_CLOUD_DB_USER,
-  password: process.env.CLEVER_CLOUD_DB_PASSWORD,
-  server: process.env.CLEVER_CLOUD_DB_SERVER,
-  database: process.env.CLEVER_CLOUD_DB_NAME,
-  port: process.env.CLEVER_CLOUD_DB_PORT || 1433, // Ajusta el puerto según la configuración de tu base de datos
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  server: process.env.DB_SERVER,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 1433, // Ajusta el puerto según la configuración de tu base de datos
   options: {
     encrypt: false,
   },
