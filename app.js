@@ -1,33 +1,29 @@
-
 require('dotenv').config();
 const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 const axios = require('axios');
+const mysql = require('mysql2/promise');
 const db = require('./db/db');
 
 app.use(express.json());
 
-// Ruta para obtener información de los jefes de la API de Ninja Kiwi y jefes favoritos
 app.get('/bosses', async (req, res) => {
   try {
-    // Obtener información de los jefes de la API de Ninja Kiwi
     const response = await axios.get('https://data.ninjakiwi.com/btd6/bosses');
     const bosses = response.data;
 
-    // Obtener jefes favoritos desde la base de datos
-    const result = await db.request().query('SELECT * FROM JefesFavoritos');
-    const jefesFavoritos = result.recordset;
+    const connection = await db.connectToDatabase();
+    const [rows] = await connection.query('SELECT * FROM JefesFavoritos');
+    connection.end(); // Cerrar la conexión después de usarla
 
-    // Enviar la información de jefes de la API y jefes favoritos en la respuesta JSON
-    res.json({ bosses, jefesFavoritos });
+    res.json({ bosses, jefesFavoritos: rows });
   } catch (error) {
     console.error('Error al obtener la información de los jefes:', error.message);
     res.status(500).json({ error: 'Error al obtener la información de los jefes', details: error.message });
   }
 });
 
-// Ruta para agregar un jefe favorito
 app.post('/favoritos/agregar', async (req, res) => {
   const { nombreJefe, imagen } = req.body;
 
@@ -37,21 +33,18 @@ app.post('/favoritos/agregar', async (req, res) => {
       return res.status(400).json({ error: 'Se requiere nombreJefe' });
     }
 
-    // Insertar el jefe favorito en la base de datos
-    const result = await db.request()
-      .input('nombreJefe', sql.NVarChar, nombreJefe)
-      .input('imagen', sql.VarChar(sql.MAX), imagen) // Cambiando el tipo de dato aquí
-      .query(`
-        INSERT INTO JefesFavoritos (NombreJefe, Imagen)
-        VALUES (@nombreJefe, @imagen);
+    const connection = await db.connectToDatabase();
+    const [result] = await connection.query(
+      'INSERT INTO JefesFavoritos (NombreJefe, Imagen) VALUES (?, ?)',
+      [nombreJefe, imagen]
+    );
+    connection.end(); // Cerrar la conexión después de usarla
 
-        SELECT * FROM JefesFavoritos WHERE NombreJefe = @nombreJefe;
-      `);
+    const [jefesAgregados] = await connection.query(
+      'SELECT * FROM JefesFavoritos WHERE NombreJefe = ?',
+      [nombreJefe]
+    );
 
-    // Verificar si la respuesta contiene resultados y tomar el primer elemento
-    const jefesAgregados = result.recordset;
-
-    // Verificar si se encontraron jefes recién agregados
     if (jefesAgregados.length > 0) {
       const jefeAgregado = jefesAgregados[0];
       res.status(201).json({ success: true, message: 'Jefe favorito agregado correctamente', jefeAgregado });
@@ -64,18 +57,13 @@ app.post('/favoritos/agregar', async (req, res) => {
   }
 });
 
-// Ruta para quitar un jefe favorito
 app.delete('/favoritos/quitar/:nombreJefe', async (req, res) => {
   const nombreJefe = req.params.nombreJefe;
 
   try {
-    // Eliminar el jefe favorito de la base de datos
-    const result = await db.request()
-      .input('nombreJefe', sql.NVarChar, nombreJefe)
-      .query(`
-        DELETE FROM JefesFavoritos
-        WHERE NombreJefe = @nombreJefe
-      `);
+    const connection = await db.connectToDatabase();
+    await connection.query('DELETE FROM JefesFavoritos WHERE NombreJefe = ?', [nombreJefe]);
+    connection.end(); // Cerrar la conexión después de usarla
 
     res.json({ success: true, message: 'Jefe favorito eliminado correctamente' });
   } catch (error) {
@@ -84,13 +72,6 @@ app.delete('/favoritos/quitar/:nombreJefe', async (req, res) => {
   }
 });
 
-// Iniciar el servidor
-app.listen(port, '0.0.0.0', async () => {
-  try {
-    const dbConnection = await db.connectToDatabase();
-    // Puedes usar dbConnection para realizar operaciones en la base de datos si es necesario
-    console.log(`El servidor está escuchando en http://0.0.0.0:${port}`);
-  } catch (error) {
-    console.error('Error al iniciar el servidor:', error.message);
-  }
+app.listen(port, '0.0.0.0', () => {
+  console.log(`El servidor está escuchando en http://0.0.0.0:${port}`);
 });
