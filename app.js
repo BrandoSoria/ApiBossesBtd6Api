@@ -3,7 +3,12 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 const axios = require('axios');
+const favoritosRoutes = require('./favoritosRoutes'); 
 const db = require('./db/db');
+
+
+// Usa las rutas de favoritos
+app.use('/api', favoritosRoutes); 
 
 app.use(express.json());
 
