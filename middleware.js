@@ -1,7 +1,7 @@
 // middleware.js
 
 const jwt = require('jsonwebtoken');
-const secretKey = 'tu_secreto_jwt';
+const secretKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6WyJmYXZvcml0b0BnbWFpbC5jb20iLCJmYXZvcml0b0BnbWFpbC5jb20iXSwiZXhwIjoxNzAyNDA5NzkxfQ.D6uQ89jeq2p245c4F4htSwg3PU4P1XwRyPTsQz2KRic';
 
 const authenticateToken = (req, res, next) => {
   const token = req.headers['authorization'];
