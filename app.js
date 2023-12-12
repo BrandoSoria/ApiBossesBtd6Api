@@ -1,11 +1,13 @@
 require('dotenv').config();
 const express = require('express');
+const cors = require('cors');  // Importa el paquete cors
 const app = express();
 const port = process.env.PORT || 3000;
 const axios = require('axios');
 const favoritosRoutes = require('./favoritosRoutes'); 
 const db = require('./db/db');
 
+app.use(cors());
 
 // Usa las rutas de favoritos
 app.use('/api', favoritosRoutes); 
